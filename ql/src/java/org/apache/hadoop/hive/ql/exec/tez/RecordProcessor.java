@@ -87,18 +87,7 @@ public abstract class RecordProcessor extends InterruptibleProcessing {
 
     checkAbortCondition();
 
-    //log classpaths
-    try {
-      if (l4j.isDebugEnabled()) {
-        l4j.debug("conf classpath = "
-            + Arrays.asList(((URLClassLoader) jconf.getClassLoader()).getURLs()));
-        l4j.debug("thread classpath = "
-            + Arrays.asList(((URLClassLoader) Thread.currentThread()
-            .getContextClassLoader()).getURLs()));
-      }
-    } catch (Exception e) {
-      l4j.info("cannot get classpath: " + e.getMessage());
-    }
+    Utilities.tryLoggingClassPaths(jconf, l4j);
   }
 
   /**

@@ -24,6 +24,7 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,6 +41,14 @@ public class SparkClientUtilities {
 
   private static final Map<String, Long> downloadedFiles = new ConcurrentHashMap<>();
 
+  private static List<URL> getCurrentClassPaths(ClassLoader parentLoader) {
+    if(parentLoader instanceof URLClassLoader) {
+      return Lists.newArrayList(((URLClassLoader) parentLoader).getURLs());
+    } else {
+      return Collections.emptyList();
+    }
+  }
+
   /**
    * Add new elements to the classpath.
    *
@@ -48,8 +57,8 @@ public class SparkClientUtilities {
    */
   public static List<String> addToClassPath(Map<String, Long> newPaths, Configuration conf,
       File localTmpDir) throws Exception {
-    URLClassLoader loader = (URLClassLoader) Thread.currentThread().getContextClassLoader();
-    List<URL> curPath = Lists.newArrayList(loader.getURLs());
+    ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
+    List<URL> curPath = getCurrentClassPaths(parentLoader);
     List<String> localNewPaths = new ArrayList<>();
 
     boolean newPathAdded = false;
@@ -65,7 +74,7 @@ public class SparkClientUtilities {
 
     if (newPathAdded) {
       URLClassLoader newLoader =
-          new URLClassLoader(curPath.toArray(new URL[curPath.size()]), loader);
+          new URLClassLoader(curPath.toArray(new URL[curPath.size()]), parentLoader);
       Thread.currentThread().setContextClassLoader(newLoader);
     }
     return localNewPaths;

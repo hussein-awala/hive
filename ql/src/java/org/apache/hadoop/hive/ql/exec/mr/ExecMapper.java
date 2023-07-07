@@ -74,16 +74,7 @@ public class ExecMapper extends MapReduceBase implements Mapper {
   @Override
   public void configure(JobConf job) {
     execContext = new ExecMapperContext(job);
-    // Allocate the bean at the beginning -
-      try {
-      l4j.info("conf classpath = "
-          + Arrays.asList(((URLClassLoader) job.getClassLoader()).getURLs()));
-      l4j.info("thread classpath = "
-          + Arrays.asList(((URLClassLoader) Thread.currentThread()
-          .getContextClassLoader()).getURLs()));
-    } catch (Exception e) {
-      l4j.info("cannot get classpath: " + e.getMessage());
-    }
+    Utilities.tryLoggingClassPaths(job, l4j);
 
     setDone(false);
 

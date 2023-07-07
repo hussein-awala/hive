@@ -23,15 +23,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
+import java.security.AccessController;
 import java.lang.management.MemoryMXBean;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.hive.ql.exec.SerializationUtilities;
+import org.apache.hadoop.hive.ql.exec.*;
 import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,14 +50,6 @@ import org.apache.hadoop.hive.ql.DriverContext;
 import org.apache.hadoop.hive.ql.ErrorMsg;
 import org.apache.hadoop.hive.ql.QueryPlan;
 import org.apache.hadoop.hive.ql.QueryState;
-import org.apache.hadoop.hive.ql.exec.FetchOperator;
-import org.apache.hadoop.hive.ql.exec.HiveTotalOrderPartitioner;
-import org.apache.hadoop.hive.ql.exec.Operator;
-import org.apache.hadoop.hive.ql.exec.OperatorUtils;
-import org.apache.hadoop.hive.ql.exec.PartitionKeySampler;
-import org.apache.hadoop.hive.ql.exec.TableScanOperator;
-import org.apache.hadoop.hive.ql.exec.Task;
-import org.apache.hadoop.hive.ql.exec.Utilities;
 import org.apache.hadoop.hive.ql.exec.tez.TezSessionPoolManager;
 import org.apache.hadoop.hive.ql.exec.tez.TezSessionState;
 import org.apache.hadoop.hive.ql.io.BucketizedHiveInputFormat;
@@ -744,7 +733,9 @@ public class ExecDriver extends Task<MapredWork> implements Serializable, Hadoop
       // see also - code in CliDriver.java
       ClassLoader loader = conf.getClassLoader();
       if (StringUtils.isNotBlank(libjars)) {
-        loader = Utilities.addToClassPath(loader, StringUtils.split(libjars, ","));
+        AddToClassPathAction addAction = new AddToClassPathAction(
+                loader, Arrays.asList(StringUtils.split(libjars, ",")));
+        loader = AccessController.doPrivileged(addAction);
       }
       conf.setClassLoader(loader);
       // Also set this to the Thread ContextClassLoader, so new threads will

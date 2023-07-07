@@ -18,6 +18,7 @@
 
 package org.apache.hadoop.hive.ql.exec.spark;
 
+import org.apache.hadoop.hive.ql.exec.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.hive.ql.exec.MapredContext;
@@ -59,15 +60,7 @@ public abstract class SparkRecordHandler {
 
     LOG.info("maximum memory = " + memoryMXBean.getHeapMemoryUsage().getMax());
 
-    try {
-      LOG.info("conf classpath = "
-        + Arrays.asList(((URLClassLoader) job.getClassLoader()).getURLs()));
-      LOG.info("thread classpath = "
-        + Arrays.asList(((URLClassLoader) Thread.currentThread()
-        .getContextClassLoader()).getURLs()));
-    } catch (Exception e) {
-      LOG.info("cannot get classpath: " + e.getMessage());
-    }
+    Utilities.tryLoggingClassPaths(job, LOG);
   }
 
   /**

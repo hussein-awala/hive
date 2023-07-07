@@ -96,17 +96,7 @@ public class ExecReducer extends MapReduceBase implements Reducer {
     ObjectInspector[] valueObjectInspector = new ObjectInspector[Byte.MAX_VALUE];
     ObjectInspector keyObjectInspector;
 
-    if (isInfoEnabled) {
-      try {
-        LOG.info("conf classpath = "
-            + Arrays.asList(((URLClassLoader) job.getClassLoader()).getURLs()));
-        LOG.info("thread classpath = "
-            + Arrays.asList(((URLClassLoader) Thread.currentThread()
-            .getContextClassLoader()).getURLs()));
-      } catch (Exception e) {
-        LOG.info("cannot get classpath: " + e.getMessage());
-      }
-    }
+    Utilities.tryLoggingClassPaths(job, LOG);
     jc = job;
 
     ReduceWork gWork = Utilities.getReduceWork(job);

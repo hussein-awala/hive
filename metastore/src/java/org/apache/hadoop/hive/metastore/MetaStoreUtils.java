@@ -27,20 +27,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.apache.commons.lang.StringUtils;
@@ -705,7 +698,6 @@ public class MetaStoreUtils {
    * validate column type
    *
    * if it is predefined, yes. otherwise no
-   * @param name
    * @return
    */
   static public String validateColumnType(String type) {
@@ -1856,6 +1848,14 @@ public class MetaStoreUtils {
     return oneurl;
   }
 
+  private static List<URL> getCurrentClassPaths(ClassLoader parentLoader) {
+    if(parentLoader instanceof URLClassLoader) {
+      return Lists.newArrayList(((URLClassLoader) parentLoader).getURLs());
+    } else {
+      return Collections.emptyList();
+    }
+  }
+
   /**
    * Add new elements to the classpath.
    *
@@ -1863,8 +1863,7 @@ public class MetaStoreUtils {
    *          Array of classpath elements
    */
   public static ClassLoader addToClassPath(ClassLoader cloader, String[] newPaths) throws Exception {
-    URLClassLoader loader = (URLClassLoader) cloader;
-    List<URL> curPath = Arrays.asList(loader.getURLs());
+    List<URL> curPath = getCurrentClassPaths(cloader);
     ArrayList<URL> newPath = new ArrayList<URL>();
 
     // get a list with the current classpath components
@@ -1880,7 +1879,7 @@ public class MetaStoreUtils {
       }
     }
 
-    return new URLClassLoader(curPath.toArray(new URL[0]), loader);
+    return new URLClassLoader(curPath.toArray(new URL[0]), cloader);
   }
 
   public static String encodeTableName(String name) {
