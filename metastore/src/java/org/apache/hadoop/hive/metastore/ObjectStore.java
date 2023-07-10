@@ -161,8 +161,8 @@ import org.datanucleus.NucleusContext;
 import org.datanucleus.api.jdo.JDOPersistenceManager;
 import org.datanucleus.api.jdo.JDOPersistenceManagerFactory;
 import org.datanucleus.store.rdbms.exceptions.MissingTableException;
-import org.datanucleus.store.scostore.Store;
-import org.datanucleus.util.WeakValueMap;
+import org.datanucleus.store.types.scostore.Store;
+import org.datanucleus.util.ConcurrentReferenceHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8188,7 +8188,7 @@ public class ObjectStore implements RawStore, Configurable {
 
     Map<String,Class> map = (Map<String, Class>) mapField.get(clri);
     long sz = map.size();
-    mapField.set(clri, Collections.synchronizedMap(new WeakValueMap()));
+    mapField.set(clri,  new ConcurrentReferenceHashMap<>());
     return sz;
   }
 

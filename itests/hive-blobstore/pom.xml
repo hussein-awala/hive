@@ -256,6 +256,9 @@
           <systemPropertyVariables>
             <test.blobstore.path>${test.blobstore.path}</test.blobstore.path>
           </systemPropertyVariables>
+          <argLine>
+            --illegal-access=permit
+          </argLine>
         </configuration>
       </plugin>
       <plugin>
