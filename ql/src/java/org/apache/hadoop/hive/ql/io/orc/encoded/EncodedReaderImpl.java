@@ -50,8 +50,6 @@ import org.apache.hadoop.hive.ql.io.orc.encoded.Reader.OrcEncodedColumnBatch;
 import org.apache.hadoop.hive.ql.io.orc.encoded.Reader.PoolFactory;
 import org.apache.orc.OrcProto;
 
-import sun.misc.Cleaner;
-
 
 /**
  * Encoded reader implementation.
@@ -1404,20 +1402,8 @@ class EncodedReaderImpl implements EncodedReader {
       dataReader.releaseBuffer(bb);
       return;
     }
-    Field localCf = cleanerField;
-    if (!bb.isDirect() || localCf == null) return;
-    try {
-      Cleaner cleaner = (Cleaner) localCf.get(bb);
-      if (cleaner != null) {
-        cleaner.clean();
-      } else {
-        LOG.debug("Unable to clean a buffer using cleaner - no cleaner");
-      }
-    } catch (Exception e) {
-      // leave it for GC to clean up
-      LOG.warn("Unable to clean direct buffers using Cleaner.");
-      cleanerField = null;
-    }
+    if (!bb.isDirect()) return;
+    bb.clear();
   }
 
 
